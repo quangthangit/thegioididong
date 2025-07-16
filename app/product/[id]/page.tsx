@@ -1,25 +1,19 @@
-"use client"
+"use client";
 
 import { Product } from "@/app/types/ItemType";
 import React, { useEffect, useState } from "react";
 
-interface PageProps {
-  params: { id: string };
-}
-
-const ProductDetailPage = ({ params }: PageProps) => {
+const ProductDetailPage = ({ params }: { params: Promise<{ id: number }> }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
-    const productId = params.id;
+    const productId = params;
     if (!productId) {
       setError("Invalid product ID");
       setLoading(false);
       return;
     }
-
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -30,7 +24,7 @@ const ProductDetailPage = ({ params }: PageProps) => {
           }
         );
         if (!response.ok) {
-          throw new Error(`Failed to fetch product with ID ${productId}`);
+          throw new Error("Failed to fetch products");
         }
         const data = await response.json();
         setProduct(data);
@@ -40,13 +34,14 @@ const ProductDetailPage = ({ params }: PageProps) => {
         setLoading(false);
       }
     };
-
     fetchProduct();
-  }, [params.id]);
+  }, []);
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
-  if (!product) return <div className="text-center py-4">Product not found</div>;
+  if (error)
+    return <div className="text-center py-4 text-red-500">{error}</div>;
+  if (!product)
+    return <div className="text-center py-4">Product not found</div>;
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -70,7 +65,9 @@ const ProductDetailPage = ({ params }: PageProps) => {
           </div>
         </div>
         <div>
-          <p className="text-gray-600 mb-2">Category: {product.category.name}</p>
+          <p className="text-gray-600 mb-2">
+            Category: {product.category.name}
+          </p>
           <p className="text-2xl font-semibold text-gray-900 mb-2">
             ${product.price.toFixed(2)}
           </p>
