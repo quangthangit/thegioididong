@@ -7,6 +7,7 @@ const ProductDetailPage = ({ params }: { params: { id?: string } }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const productId = params?.id;
     if (!productId) {
@@ -14,28 +15,30 @@ const ProductDetailPage = ({ params }: { params: { id?: string } }) => {
       setLoading(false);
       return;
     }
+
     const fetchProduct = async () => {
       try {
-      setLoading(true);
-      const response = await fetch(
-        `https://api.escuelajs.co/api/v1/products/${productId}`,
-        {
-          next: { revalidate: 3600 },
+        setLoading(true);
+        const response = await fetch(
+          `https://api.escuelajs.co/api/v1/products/${productId}`,
+          {
+            next: { revalidate: 3600 }, 
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch product with ID ${productId}`);
         }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      setProduct(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
     };
+
     fetchProduct();
-  },[]); 
+  }, [params.id]); 
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
