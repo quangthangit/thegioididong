@@ -3,13 +3,17 @@
 import { Product } from "@/app/types/ItemType";
 import React, { useEffect, useState } from "react";
 
-const ProductDetailPage = ({ params }: { params: { id?: string } }) => {
+interface PageProps {
+  params: { id: string };
+}
+
+const ProductDetailPage = ({ params }: PageProps) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const productId = params?.id;
+    const productId = params.id;
     if (!productId) {
       setError("Invalid product ID");
       setLoading(false);
@@ -22,7 +26,7 @@ const ProductDetailPage = ({ params }: { params: { id?: string } }) => {
         const response = await fetch(
           `https://api.escuelajs.co/api/v1/products/${productId}`,
           {
-            next: { revalidate: 3600 }, 
+            next: { revalidate: 3600 },
           }
         );
         if (!response.ok) {
@@ -38,7 +42,7 @@ const ProductDetailPage = ({ params }: { params: { id?: string } }) => {
     };
 
     fetchProduct();
-  }, [params.id]); 
+  }, [params.id]);
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
